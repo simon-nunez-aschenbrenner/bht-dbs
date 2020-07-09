@@ -16,6 +16,8 @@ public class Data {
 		for (int i : test) {
 			System.out.println(i);
 		}
+		
+		query.close();
 
 	}
 
