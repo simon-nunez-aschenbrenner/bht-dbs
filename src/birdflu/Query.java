@@ -14,7 +14,6 @@ public class Query {
 	protected ResultSet result;
 	protected Statement stmt;
 	
-	
 	public Query(String query) {
 		
 		this.query = query;
