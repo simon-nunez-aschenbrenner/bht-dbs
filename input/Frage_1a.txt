@@ -1,0 +1,3 @@
+PieChart
+Popularität von Suchbegriffen zum Thema "Vogelgrippe"
+select h5n1_terms.term, count(distinct querydata.querytime) from aoldata.querydata join h5n1_terms on query like '%'||term||'%' group by h5n1_terms.term order by 2 desc
