@@ -9,6 +9,13 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
+/**
+ * Class for collecting data for the semester project "Bird Flu"
+ * 
+ * Modul Datenbanksysteme, Dozent Aljoscha Marcel Everding, SS2020
+ * 
+ * @author Simon Aschenbrenner, Luis Rieke, Büsra Bagci, Paul Gronemeyer
+ */
 public class Query {
 	
 	protected String query;
@@ -26,8 +33,7 @@ public class Query {
 			stmt = con.createStatement();
 			result = stmt.executeQuery(query);	
 		} catch (SQLException e) {
-			Logger logger = Logger.getLogger("SQL Logger");
-			logger.warning(e.getMessage());
+			Logger.getLogger("SQL Logger").severe("SQL Exception: " + e.getMessage());
 		}
 	}
 	
@@ -40,51 +46,38 @@ public class Query {
 				list.add(result.getInt(column));
 			}
 		} catch (SQLException e) {
-			e.getMessage();
-			e.getSQLState();
-			e.getErrorCode();
+			Logger.getLogger("SQL Logger").warning("SQL Exception: " + e.getMessage());
 		}
 		
-		if (list.size() < 1) {
-			throw new NoDataException(query);
-		} else {
-//			for(Integer i : list) {
-//				System.out.println(i);
-//			}
-			return list;
-		}
+		if (list.size() < 1) { throw new NoDataException(query); }
+		else { return list; }
 	}
 	
-	public HashMap<String, Integer> getMap(int keyColumn, int valueColumn) throws NoDataException {
+	public HashMap<String, Integer> getMap(int keyColumn, int valueColumn)
+			throws NoDataException {
 		
 		HashMap<String, Integer> map = new HashMap<String, Integer>();
 		
 		try {
 			while (result.next()) {
-				map.put(result.getString(keyColumn), result.getInt(valueColumn));
+				String key = result.getString(keyColumn);
+				Integer value = result.getInt(valueColumn);
+				if(key != null && value != null) { map.put(key, value); }
 			}
 		} catch (SQLException e) {
-			e.getMessage();
-			e.getSQLState();
-			e.getErrorCode();
+			Logger.getLogger("SQL Logger").warning("SQL Exception: " + e.getMessage());
 		}
 		
-		if (map.size() < 1) {
-			throw new NoDataException(query);
-		} else {
-			return map;
-		}
+		if (map.size() < 1) { throw new NoDataException(query); }
+		else { return map; }
 	}
 	
-	public boolean close() {
+	public void close() {
 		try {
 			result.close();
 			stmt.close();
-			return true;
 		} catch (SQLException e) {
-			Logger logger = Logger.getLogger("SQL Logger");
-			logger.warning(e.getMessage());
-			return false;
+			Logger.getLogger("SQL Logger").severe("SQL Exception: " + e.getMessage());
 		}
 	}
 }

@@ -1,93 +1,194 @@
 package birdflu;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Font;
-import java.io.File;
-import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.logging.Logger;
 
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.ChartUtils;
 import org.jfree.chart.JFreeChart;
-import org.jfree.chart.block.BlockBorder;
-import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.axis.DateAxis;
+import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.chart.title.TextTitle;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYSeries;
 import org.jfree.data.xy.XYSeriesCollection;
 
-public class LineChart {
+/**
+ * Class for generating line charts for the semester project "Bird Flu"
+ * The source data has to cover all 92 days.
+ * 
+ * Modul Datenbanksysteme, Dozent Aljoscha Marcel Everding, SS2020
+ * 
+ * @author Simon Aschenbrenner, Luis Rieke, Büsra Bagci, Paul Gronemeyer
+ * 
+ * Charts are generated using:
+ * 
+ * JFreeChart : a free chart library for the Java(tm) platform
+ * 
+ * (C) Copyright 2000-2017, by Object Refinery Limited and Contributors.
+ *
+ * Project Info:  http://www.jfree.org/jfreechart/index.html
+ *
+ * This library is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation; either version 2.1 of the License, or
+ * (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful, but
+ * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+ * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+ * USA.
+ *
+ * [Oracle and Java are registered trademarks of Oracle and/or its affiliates.
+ * Other names may be trademarks of their respective owners.]
+ */
+public class LineChart implements BirdFluChart {
 	
-	public static final String PATH = "./output/";
-	
-	protected JFreeChart lineChart = null;
-	protected ChartPanel chartPanel;
-	protected String title;
-	protected String xAxis;
-	protected String yAxis;
-	
-	public LineChart(Query query, String title, String xAxis, String yAxis) {
+	public static final int COLUMN = 2;
 		
-		this.title = title;
-		this.xAxis = xAxis;
-		this.yAxis = yAxis;
+	protected JFreeChart chart;
+	protected String filename;
+	
+	private LineChart(String filename, LinkedList<Integer> source, String title,
+			String xAxisLabel, String yAxisLabel) {
 		
-		try {
-			lineChart = createChart(createDataset(query.getList(2)));
-		} catch (NoDataException e) {
-			Logger.getLogger("Chart Logger").warning(e.getMessage());
-		}
+		this.filename = filename;
+		chart = initChart(source, title, xAxisLabel, yAxisLabel);
 	}
 	
-	private XYDataset createDataset(LinkedList<Integer> source) {
+	private JFreeChart initChart(LinkedList<Integer> source, String title, String xAxis,
+			String yAxis) {
 		
-		XYSeries series = new XYSeries(title);
+		XYDataset dataset = initDataset(source);
+		
+		DateAxis timeAxis = new DateAxis(xAxis);
+        timeAxis.setLowerMargin(0.01);
+        timeAxis.setUpperMargin(0.01);
+        timeAxis.setDateFormatOverride(new SimpleDateFormat("dd.MM"));
+
+		NumberAxis valueAxis = new NumberAxis(yAxis);
+		valueAxis.setAutoRangeIncludesZero(false);
+        
+        XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer(true, false);
+        XYPlot plot = new XYPlot(dataset, timeAxis, valueAxis, null);        
+        plot.setRenderer(renderer);
+        
+        JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, false);
+        ChartPlotter.getTheme().apply(chart);
+
+        return chart;
+	}
+	
+	private XYDataset initDataset(LinkedList<Integer> source) {
+		XYSeries series = new XYSeries(filename);
 		XYSeriesCollection dataset = new XYSeriesCollection();
 		
-		Integer index = 0;
+		Integer index = 1;
 		while(!source.isEmpty()) {
-			series.add(index, source.removeFirst());
-			index ++;
+			long date = getDateInMillis(index);
+			if(date > 0) {
+				series.add(date, source.removeFirst());
+				index ++;
+			} else {
+				Logger.getLogger("Chart Logger").warning
+				("Error while creating dataset for " + filename + "(@ Index " + index + ")");
+				return null;
+			}	
 		}
         dataset.addSeries(series);
         return dataset;
 	}
 	
-	private JFreeChart createChart(XYDataset dataset) {
-		JFreeChart chart = ChartFactory.createXYLineChart(
-				title, xAxis, yAxis, dataset, PlotOrientation.VERTICAL, true, true, false);
-		
-		XYPlot plot = chart.getXYPlot();
-		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-		
-		renderer.setSeriesPaint(0, Color.RED);
-		renderer.setSeriesStroke(0, new BasicStroke(2.0f));
-
-		plot.setRenderer(renderer);
-		plot.setBackgroundPaint(Color.white);
-		plot.setRangeGridlinesVisible(true);
-		plot.setRangeGridlinePaint(Color.BLACK);
-		plot.setDomainGridlinesVisible(true);
-		plot.setDomainGridlinePaint(Color.BLACK);
-
-		chart.getLegend().setFrame(BlockBorder.NONE);
-		chart.setTitle(new TextTitle(title, new Font("Serif", java.awt.Font.BOLD, 18)));
-		
-        return chart;
+	private long getDateInMillis(int index) {
+		if(index < 32) {
+			return new GregorianCalendar(2006, Calendar.MARCH, index).getTimeInMillis();
+		}
+		else if(index < 62) {
+			return new GregorianCalendar(2006, Calendar.APRIL, index-31).getTimeInMillis();
+		}
+		else if(index < 93) {
+			return new GregorianCalendar(2006, Calendar.MAY, index-61).getTimeInMillis();
+		} else {
+			return 0;
+		}
 	}
 	
-	public void save() {
-		if(lineChart != null) {
-			try {
-				ChartUtils.saveChartAsPNG(new File(PATH + title + ".png"), lineChart, 450, 400);
-			} catch (IOException e) {
-				Logger.getLogger("Chart Logger").warning(title + e.getMessage());
-			}
+	public static LineChart createLineChart
+		(String filename, Query query, String title, String xAxis, String yAxis) {
+		
+		LinkedList<Integer> source = null;
+		
+		try {
+			source = query.getList(COLUMN);
+		} catch (NoDataException e) {
+			Logger.getLogger("Chart Logger").warning("Could not create LineChart for "
+					+ filename + "\nNoDataException: " + e.getMessage());
+		} finally {
+			query.close();
 		}
+		
+		if(source != null) {
+			return new LineChart(filename, source, title, xAxis, yAxis);
+		} else {
+			Logger.getLogger("Chart Logger").warning
+			("Could not create LineChart for " + filename);
+			return null;
+		}
+	}
+	
+	public static LineChart createLineChartPCM
+		(String filename, Query dividendQuery, Query divisorQuery, String title,
+				String xAxis, String yAxis) {
+		
+		LinkedList<Integer> dividends = null;
+		LinkedList<Integer> divisors = null;
+		
+		try {
+			dividends = dividendQuery.getList(COLUMN);
+			divisors  = divisorQuery.getList(COLUMN);
+		} catch (NoDataException e) {
+			Logger.getLogger("Chart Logger").warning("Could not create LineChart for "
+					+ filename + "\nNoDataException: " + e.getMessage());
+		} finally {
+			dividendQuery.close();
+			divisorQuery.close();
+		}
+		
+		if(dividends == null || divisors == null) {
+			Logger.getLogger("Chart Logger").warning
+			("Could not create LineChartPCM for " + filename);
+			return null;
+		}
+		if(dividends.size() != divisors.size()) {
+			Logger.getLogger("Chart Logger").warning
+			("Could not create LineChartPCM for " + filename);
+			return null;
+		}
+			
+		LinkedList<Integer> quotients = new LinkedList<Integer>();
+		int size = dividends.size();
+		for(int i = 0; i < size; i++) {
+			double fraction =
+					(double) dividends.removeFirst() / (double) divisors.removeFirst();
+			quotients.add(Integer.valueOf((int)(fraction*100000)));
+		}
+ 		return new LineChart(filename, quotients, title, xAxis, yAxis);
+	}
+	
+	@Override
+	public JFreeChart getChart() {
+		return chart;
+	}
+	
+	@Override	
+	public String getFilename() {
+		return filename;
 	}
 }
