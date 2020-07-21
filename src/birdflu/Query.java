@@ -14,24 +14,52 @@ import java.util.logging.Logger;
  * 
  * Modul Datenbanksysteme, Dozent Aljoscha Marcel Everding, SS2020
  * 
- * @author Simon Aschenbrenner, Luis Rieke, Büsra Bagci, Paul Gronemeyer
+ * @author Simon Aschenbrenner, Luis Rieke, Paul Gronemeyer, Büsra Bagci
  */
 public class Query {
 	
 	protected String query;
 	protected ResultSet result;
+	int[] results;
 	protected Statement stmt;
 	
 	public Query(String query) {
-		
 		this.query = query;
+		init();
+		
+		try {
+			result = stmt.executeQuery(query);
+			Logger.getLogger("SQL Logger").info("Executed query: " + this.query);
+		} catch (SQLException e) {
+			Logger.getLogger("SQL Logger").severe("SQL Exception: " + e.getMessage());
+		}
+	}
+	
+	public Query(LinkedList<String> queries) {
+		init();
+		try {
+			for(String sql : queries) {
+				stmt.addBatch(sql);
+				Logger.getLogger("SQL Logger").finest("Adding to batch: " + sql);
+			}
+			results = stmt.executeBatch();
+			Logger.getLogger("SQL Logger").info("Executed batch");
+			Logger.getLogger("SQL Logger").finer("Results: " + results.toString());
+		} catch (SQLException e) {
+			Logger.getLogger("SQL Logger").severe("SQL Exception: " + e.getMessage());
+		}
+	}
+	
+	/**
+	 * Set up SQL Database Connection and initialize Statement-object.
+	 */
+	private void init() {
 		
 		try {
 			DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
 			Connection con = DriverManager.getConnection
 					("jdbc:oracle:thin:@localhost:1521:rispdb1", "s908606", "dadatenbanken303!");
 			stmt = con.createStatement();
-			result = stmt.executeQuery(query);	
 		} catch (SQLException e) {
 			Logger.getLogger("SQL Logger").severe("SQL Exception: " + e.getMessage());
 		}
@@ -72,7 +100,16 @@ public class Query {
 		else { return map; }
 	}
 	
+	public boolean batchSuccess() {
+		boolean success = true;
+		for(int i : results) {
+			if(i < 0) { success = false; }
+		}
+		return success;
+	}
+	
 	public void close() {
+		
 		try {
 			result.close();
 			stmt.close();

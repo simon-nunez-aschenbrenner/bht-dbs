@@ -1,7 +1,6 @@
 package birdflu;
 
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -22,7 +21,7 @@ import org.jfree.chart.StandardChartTheme;
  * 
  * Modul Datenbanksysteme, Dozent Aljoscha Marcel Everding, SS2020
  * 
- * @author Simon Aschenbrenner, Luis Rieke, Büsra Bagci, Paul Gronemeyer
+ * @author Simon Aschenbrenner, Luis Rieke, Paul Gronemeyer, Büsra Bagci
  * 
  * Charts are generated using:
  * 
@@ -78,9 +77,11 @@ public class ChartPlotter {
 		chrtLogger.addHandler(handler);
 		fileLogger.addHandler(handler);
 		
-		for(BirdFluChart chart : createCharts()) {
-			saveChart(chart);
-		}
+//		for(BirdFluChart chart : createCharts()) {
+//			saveChart(chart);
+//		}
+		
+		new CreateTable("Followup.txt");
 	}
 	
 	/**
@@ -194,25 +195,5 @@ public class ChartPlotter {
 	
 	public static ChartTheme getTheme() {
 		return StandardChartTheme.createDarknessTheme();
-	}
-	
-	private static class InputFileFilter implements FileFilter {
-
-		@Override
-		public boolean accept(File pathname) {
-			if(pathname.isDirectory() || pathname.isHidden()) {
-				Logger.getLogger("File Logger").finer
-				("Filtered out directory or hidden file: " + pathname.getName());
-				return false;
-			}
-			if(pathname.getName().endsWith(".txt")) {
-				Logger.getLogger("File Logger").finer("Accepted .txt file for input: "
-						+ pathname.getName());
-				return true;
-			}
-			Logger.getLogger("File Logger").finer("Filtered out unknown filetype: "
-					+ pathname.getName());
-			return false;
-		}
 	}
 }
