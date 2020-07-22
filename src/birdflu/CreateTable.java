@@ -25,6 +25,16 @@ import java.util.logging.Logger;
 public class CreateTable {
 	
 	public static final String INPUT_DIRECTORY = "./rawdata/";
+	public static final String[] TABLES = {
+			"H5N1_TERMS_A",
+			"H5N1_TERMS_B",
+			"H5N1_TERMS_C",
+			"COUNTRIES",
+			"FOLLOWUP_CATEGORIES",
+			"FOLLOWUPS",
+			"WEBSITE_CATEGORIES",
+			"WEBSITES"
+	};
 	
 	public CreateTable(String filename) {
 		
@@ -69,13 +79,15 @@ public class CreateTable {
 		String columns = in.nextLine();
 		String integrity = in.nextLine();
 		LinkedList<String> insertions = new LinkedList<String>();
-		
-		insertions.add(String.format("CREATE TABLE %s (%s)", tableName, integrity));
+		insertions.add(String.format("CREATE TABLE %s(%s)", tableName, integrity));
 		
 		while(in.hasNextLine()) {
 			insertions.add("INSERT INTO " + tableName + "(" + columns + ") VALUES (" + in.nextLine() + ")");
 		}
 		
-		return new Query(insertions).batchSuccess();
+		Query query = new Query(insertions);
+		boolean success = query.batchSuccess();
+		query.close();
+		return success;
 	}
 }

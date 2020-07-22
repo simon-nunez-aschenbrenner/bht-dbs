@@ -1,7 +1,0 @@
-BarChart
-5
-Popularität aufgerufener Webseiten
-URLs
-Aufrufe
-1
-select querydata.clickurl, count(distinct querydata.querytime) from h5n1_terms join AOLDATA.querydata on query like '%'||term||'%' group by querydata.clickurl order by 2 desc
