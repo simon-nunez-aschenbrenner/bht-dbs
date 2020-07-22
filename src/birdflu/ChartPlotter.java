@@ -2,7 +2,11 @@ package birdflu;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.NoSuchElementException;
@@ -52,6 +56,8 @@ import org.jfree.chart.StandardChartTheme;
 
 public class ChartPlotter {
 	
+	public static final boolean CREATE_NEW_TABLES = false;
+	
 	public static final String INPUT_DIRECTORY = "./input/";
 	public static final String OUTPUT_DIRECTORY = "./output/";
 	public static final int CHART_WIDTH = 1000;
@@ -65,6 +71,8 @@ public class ChartPlotter {
 		Logger chrtLogger = Logger.getLogger("Chart Logger");
 		Logger fileLogger = Logger.getLogger("File Logger");
 		
+		sqlLogger.setLevel(Level.ALL);
+		chrtLogger.setLevel(Level.ALL);
 		fileLogger.setLevel(Level.ALL);
 		
 		sqlLogger.setUseParentHandlers(false);
@@ -72,24 +80,61 @@ public class ChartPlotter {
 		fileLogger.setUseParentHandlers(false);
 		
 		Handler handler = new ConsoleHandler();
-		handler.setLevel(Level.ALL);
+		handler.setLevel(Level.FINE);
 		sqlLogger.addHandler(handler);
 		chrtLogger.addHandler(handler);
 		fileLogger.addHandler(handler);
 		
-//		for(BirdFluChart chart : createCharts()) {
-//			saveChart(chart);
-//		}
-		
-		new CreateTable("Followup.txt");
+		ChartPlotter plotter = new ChartPlotter(CREATE_NEW_TABLES);
+		for(BirdFluChart chart : plotter.createCharts()) {
+			plotter.saveChart(chart);
+		}
 	}
+	
+	public ChartPlotter(boolean createNewTables) {
+		if(createNewTables) { createNewTables(); }
+	}
+	
+	private void createNewTables() {
+		for(String table : CreateTable.TABLES) {
+			new CreateTable(table + ".txt");
+		}
+	}
+	
+//	public void printURLs() {
+//		
+//		PrintWriter out = null;
+//		try {
+//			out = new PrintWriter(new FileWriter(new File("./output.txt")));
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	
+//		Query query = new Query
+//			("select querydata.clickurl, count(distinct querydata.querytime) "
+//					+ "from h5n1_terms join AOLDATA.querydata on query like '%'||term||'%' "
+//					+ "group by querydata.clickurl order by 2 desc");
+//		ResultSet result = query.getResultSet();	
+//		try {
+//			while (result.next()) {
+//				String url = result.getString(1);
+//				if(url == null) { continue; }
+//				else {out.println("'" + url + "', 0"); }
+//			}
+//		} catch (SQLException e) {
+//			Logger.getLogger("SQL Logger").warning("SQL Exception: " + e.getMessage());
+//		}
+//		query.close();
+//		out.flush();
+//		out.close();
+//	}
 	
 	/**
 	 * Scans the input directory for files to create charts using the read() method below.
 	 * The filename wil be carried through as an identifier of the source of each chart.
 	 * @return	a LinkedList containing all generated charts
 	 */
-	public static LinkedList<BirdFluChart> createCharts() {
+	public LinkedList<BirdFluChart> createCharts() {
 		
 		LinkedList<BirdFluChart> chartList = new LinkedList<BirdFluChart>();
 		File dir = new File(INPUT_DIRECTORY);
@@ -134,7 +179,7 @@ public class ChartPlotter {
 	 * @return 	a chart implementing the BirdFluChart interface, so it can be saved later
 	 * @throws NoSuchElementException
 	 */
-	private static BirdFluChart read(Scanner in, String filename)
+	private BirdFluChart read(Scanner in, String filename)
 			throws NoSuchElementException, NumberFormatException {
 		
 		String chartType = in.nextLine();
@@ -175,7 +220,7 @@ public class ChartPlotter {
 	 * height of the image are specified as static constants in the class attributes.
 	 * @param chart - the chart to be saved (must implement the BirdFluChart interface)
 	 */
-	public static void saveChart(BirdFluChart chart) {
+	public void saveChart(BirdFluChart chart) {
 		if(chart != null) {
 			try {
 				ChartUtils.saveChartAsPNG(new File(OUTPUT_DIRECTORY + chart.getFilename()

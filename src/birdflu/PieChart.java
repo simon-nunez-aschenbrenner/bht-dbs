@@ -1,7 +1,6 @@
 package birdflu;
 
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.logging.Logger;
 
 import org.jfree.chart.JFreeChart;

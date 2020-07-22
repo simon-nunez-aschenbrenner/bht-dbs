@@ -1,0 +1,7 @@
+BarChart
+0
+Suchen zum Thema "Vogelgrippe" mit Landesbezug
+Suchanfrage
+Aufrufe
+0
+select country_searches.search, count(distinct querydata.querytime) from country_searches join AOLDATA.querydata on query like '%'||country_searches.search||'%' group by country_searches.search order by 2 desc

@@ -42,9 +42,13 @@ public class Query {
 				stmt.addBatch(sql);
 				Logger.getLogger("SQL Logger").finest("Adding to batch: " + sql);
 			}
-			results = stmt.executeBatch();
-			Logger.getLogger("SQL Logger").info("Executed batch");
-			Logger.getLogger("SQL Logger").finer("Results: " + results.toString());
+			int[] resultArray = stmt.executeBatch();
+			results = resultArray;
+			String resultString = "";
+			for(int i : resultArray) {
+				resultString += Integer.toString(i);
+			}
+			Logger.getLogger("SQL Logger").finer("Results: " + resultString);
 		} catch (SQLException e) {
 			Logger.getLogger("SQL Logger").severe("SQL Exception: " + e.getMessage());
 		}
@@ -63,6 +67,10 @@ public class Query {
 		} catch (SQLException e) {
 			Logger.getLogger("SQL Logger").severe("SQL Exception: " + e.getMessage());
 		}
+	}
+	
+	public ResultSet getResultSet() {
+		return result;
 	}
 	
 	public LinkedList<Integer> getList(int column) throws NoDataException {
