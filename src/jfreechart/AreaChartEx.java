@@ -1,5 +1,11 @@
 package jfreechart;
 
+import java.awt.Color;
+import java.awt.Font;
+
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -10,12 +16,6 @@ import org.jfree.chart.renderer.category.AreaRenderer;
 import org.jfree.chart.title.TextTitle;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.general.DatasetUtils;
-
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.Font;
 
 /**
  *

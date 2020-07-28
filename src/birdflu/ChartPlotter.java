@@ -2,11 +2,7 @@ package birdflu;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.LinkedList;
 import java.util.Locale;
 import java.util.NoSuchElementException;
@@ -56,7 +52,7 @@ import org.jfree.chart.StandardChartTheme;
 
 public class ChartPlotter {
 	
-	public static final boolean CREATE_NEW_TABLES = false;
+	public static final boolean CREATE_NEW_TABLES = true;
 	
 	public static final String INPUT_DIRECTORY = "./input/";
 	public static final String OUTPUT_DIRECTORY = "./output/";
@@ -80,7 +76,7 @@ public class ChartPlotter {
 		fileLogger.setUseParentHandlers(false);
 		
 		Handler handler = new ConsoleHandler();
-		handler.setLevel(Level.FINE);
+		handler.setLevel(Level.FINER);
 		sqlLogger.addHandler(handler);
 		chrtLogger.addHandler(handler);
 		fileLogger.addHandler(handler);
@@ -92,42 +88,8 @@ public class ChartPlotter {
 	}
 	
 	public ChartPlotter(boolean createNewTables) {
-		if(createNewTables) { createNewTables(); }
+		if(createNewTables) { CreateTable.create(); }
 	}
-	
-	private void createNewTables() {
-		for(String table : CreateTable.TABLES) {
-			new CreateTable(table + ".txt");
-		}
-	}
-	
-//	public void printURLs() {
-//		
-//		PrintWriter out = null;
-//		try {
-//			out = new PrintWriter(new FileWriter(new File("./output.txt")));
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//	
-//		Query query = new Query
-//			("select querydata.clickurl, count(distinct querydata.querytime) "
-//					+ "from h5n1_terms join AOLDATA.querydata on query like '%'||term||'%' "
-//					+ "group by querydata.clickurl order by 2 desc");
-//		ResultSet result = query.getResultSet();	
-//		try {
-//			while (result.next()) {
-//				String url = result.getString(1);
-//				if(url == null) { continue; }
-//				else {out.println("'" + url + "', 0"); }
-//			}
-//		} catch (SQLException e) {
-//			Logger.getLogger("SQL Logger").warning("SQL Exception: " + e.getMessage());
-//		}
-//		query.close();
-//		out.flush();
-//		out.close();
-//	}
 	
 	/**
 	 * Scans the input directory for files to create charts using the read() method below.

@@ -1,16 +1,16 @@
 package jfreechart;
 
+import java.awt.Color;
+
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
-
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import java.awt.Color;
-import java.awt.EventQueue;
 
 /**
  *
