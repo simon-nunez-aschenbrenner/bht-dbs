@@ -8,14 +8,8 @@ import java.util.Scanner;
 import java.util.logging.Logger;
 
 /**
- * Class for creating tables in DDL using a txt-file formated exactly like this:
- * 
- * <tablename>
- * <column1>, <column2>, ...
- * <column1> TYPE [PRIMARY KEY], [<column2> TYPE [REFERENCES <table>(<column>)]], ...
- * <valueColumn1>, <valuecolumn2>, ...
- * <valueColumn1>, <valuecolumn2>, ...
- * ...
+ * Class for creating tables using txt-files containing the DDL-statements
+ * without semicolon. One complete statement per line.
  * 
  * Modul Datenbanksysteme, Dozent Aljoscha Marcel Everding, SS2020
  * 
@@ -24,19 +18,42 @@ import java.util.logging.Logger;
  */
 public class CreateTable {
 	
-	public static final String INPUT_DIRECTORY = "./rawdata/";
+	public static final String INPUT_DIRECTORY = "./ddl/";
+	public static final String DROP_TABLES = "DROP_TABLES.txt";
 	public static final String[] TABLES = {
-			"H5N1_TERMS_A",
-			"H5N1_TERMS_B",
-			"H5N1_TERMS_C",
-			"COUNTRIES",
-			"FOLLOWUP_CATEGORIES",
-			"FOLLOWUPS",
-			"WEBSITE_CATEGORIES",
-			"WEBSITES"
+			"H5N1_BEGRIFF_A.txt",
+			"H5N1_BEGRIFF_B.txt",
+			"H5N1_BEGRIFF_C.txt",
+			"LAND.txt",
+			"WEBSEITE_KATEGORIE.txt",
+			"WEBSEITE_PRE.txt",
+			"FOLGE_KATEGORIE.txt",
+			"FOLGE_BEGRIFF.txt",
+			"KRANKHEIT.txt",
+			"OTHER_TABLES.txt"
 	};
 	
-	public CreateTable(String filename) {
+	public static void init() {
+		clear();
+		create();
+	}
+	
+	public static void clear() {
+		Query query = new Query();
+		read(DROP_TABLES, query);
+		query.close();
+	}
+	
+	public static void create() {
+		
+		Query query = new Query();
+		for(String filename : TABLES) {
+			read(filename, query);
+		}
+		query.close();
+	}
+	
+	private static void read(String filename, Query query) {
 		
 		File file = new File(INPUT_DIRECTORY + filename);
 		Scanner in = null;
@@ -45,7 +62,7 @@ public class CreateTable {
 			Logger.getLogger("File Logger").fine("Reading " + filename);
 			try {
 				in = new Scanner(file);
-				if(create(in)) {
+				if(batch(in, query)) {
 					Logger.getLogger("File Logger").info("Executed batch of " + filename);
 				} else {
 					Logger.getLogger("File Logger").warning("Could not execute batch of "
@@ -53,7 +70,10 @@ public class CreateTable {
 				}
 			} catch (FileNotFoundException e) {
 				Logger.getLogger("File Logger").warning
-					(filename + " not found: " + e.getMessage());
+					(filename + " not found");
+			} catch (NoSuchElementException e) {
+				Logger.getLogger("File Logger").warning
+					(filename + "missing element");
 			} catch (Exception e) {
 				Logger.getLogger("File Logger").warning
 				("Error while reading " + filename + ": " + e.getMessage());
@@ -73,21 +93,14 @@ public class CreateTable {
 		}
 	}
 	
-	private boolean create(Scanner in) throws NoSuchElementException {
+	private static boolean batch(Scanner in, Query query) {
 		
-		String tableName = in.nextLine();
-		String columns = in.nextLine();
-		String integrity = in.nextLine();
-		LinkedList<String> insertions = new LinkedList<String>();
-		insertions.add(String.format("CREATE TABLE %s(%s)", tableName, integrity));
+		LinkedList<String> statements = new LinkedList<String>();
 		
 		while(in.hasNextLine()) {
-			insertions.add("INSERT INTO " + tableName + "(" + columns + ") VALUES (" + in.nextLine() + ")");
+			statements.add(in.nextLine());
 		}
 		
-		Query query = new Query(insertions);
-		boolean success = query.batchSuccess();
-		query.close();
-		return success;
+		return query.executeBatch(statements);
 	}
 }

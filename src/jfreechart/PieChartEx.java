@@ -1,14 +1,14 @@
 package jfreechart;
 
+import java.awt.Color;
+
+import javax.swing.BorderFactory;
+import javax.swing.JFrame;
+
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.general.DefaultPieDataset;
-
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import java.awt.Color;
-import java.awt.EventQueue;
 
 /**
  *

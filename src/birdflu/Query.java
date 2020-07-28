@@ -20,45 +20,13 @@ public class Query {
 	
 	protected String query;
 	protected ResultSet result;
-	int[] results;
 	protected Statement stmt;
-	
-	public Query(String query) {
-		this.query = query;
-		init();
-		
-		try {
-			result = stmt.executeQuery(query);
-			Logger.getLogger("SQL Logger").info("Executed query: " + this.query);
-		} catch (SQLException e) {
-			Logger.getLogger("SQL Logger").severe("SQL Exception: " + e.getMessage());
-		}
-	}
-	
-	public Query(LinkedList<String> queries) {
-		init();
-		try {
-			for(String sql : queries) {
-				stmt.addBatch(sql);
-				Logger.getLogger("SQL Logger").finest("Adding to batch: " + sql);
-			}
-			int[] resultArray = stmt.executeBatch();
-			results = resultArray;
-			String resultString = "";
-			for(int i : resultArray) {
-				resultString += Integer.toString(i);
-			}
-			Logger.getLogger("SQL Logger").finer("Results: " + resultString);
-		} catch (SQLException e) {
-			Logger.getLogger("SQL Logger").severe("SQL Exception: " + e.getMessage());
-		}
-	}
 	
 	/**
 	 * Set up SQL Database Connection and initialize Statement-object.
 	 */
-	private void init() {
-		
+	public Query() {
+		this.query = "unknown query";
 		try {
 			DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
 			Connection con = DriverManager.getConnection
@@ -66,6 +34,38 @@ public class Query {
 			stmt = con.createStatement();
 		} catch (SQLException e) {
 			Logger.getLogger("SQL Logger").severe("SQL Exception: " + e.getMessage());
+		}
+	}
+	
+	public Query(String query) {
+		this();
+		this.query = query;
+		try {
+			result = stmt.executeQuery(query);
+			Logger.getLogger("SQL Logger").info("Executed query: " + this.query);
+		} catch (SQLException e) {
+			Logger.getLogger("SQL Logger").warning("SQL Exception: " + e.getMessage());
+		}
+	}
+	
+	public boolean executeBatch(LinkedList<String> queries) {
+		try {
+			for(String sql : queries) {
+				stmt.addBatch(sql);
+				Logger.getLogger("SQL Logger").finest("Adding to batch: " + sql);
+			}
+			int[] resultArray = stmt.executeBatch();
+			String resultString = "";
+			boolean batchSuccess = true;
+			for(int i : resultArray) {
+				if(i < 0) { batchSuccess = false; }
+				resultString += Integer.toString(i);
+			}
+			Logger.getLogger("SQL Logger").finer("Results: " + resultString);
+			return batchSuccess;
+		} catch (SQLException e) {
+			Logger.getLogger("SQL Logger").warning("SQL Exception: " + e.getMessage());
+			return false;
 		}
 	}
 	
@@ -108,19 +108,11 @@ public class Query {
 		else { return map; }
 	}
 	
-	public boolean batchSuccess() {
-		boolean success = true;
-		for(int i : results) {
-			if(i < 0) { success = false; }
-		}
-		return success;
-	}
-	
 	public void close() {
 		
 		try {
-			result.close();
-			stmt.close();
+			if(result != null) { result.close(); }
+			if(stmt != null) { stmt.close(); }
 		} catch (SQLException e) {
 			Logger.getLogger("SQL Logger").severe("SQL Exception: " + e.getMessage());
 		}
