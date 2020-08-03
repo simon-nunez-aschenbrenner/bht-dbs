@@ -18,19 +18,26 @@ import java.util.logging.Logger;
  */
 public class CreateTable {
 	
-	public static final String INPUT_DIRECTORY = "./ddl/";
+	public static final String INPUT_DIRECTORY = "./tables/";
 	public static final String DROP_TABLES = "DROP_TABLES.txt";
 	public static final String[] TABLES = {
 			"H5N1_BEGRIFF_A.txt",
 			"H5N1_BEGRIFF_B.txt",
 			"H5N1_BEGRIFF_C.txt",
+			"H5N1_BEGRIFF.txt",
 			"LAND.txt",
+			"FAELLE.txt",
 			"WEBSEITE_KATEGORIE.txt",
 			"WEBSEITE_PRE.txt",
+			"WEBSEITE.txt",
 			"FOLGE_KATEGORIE.txt",
 			"FOLGE_BEGRIFF.txt",
 			"KRANKHEIT.txt",
-			"OTHER_TABLES.txt"
+			"NUTZER_IN.txt",
+			"SEQUENCE.txt",
+			"H5N1_SUCHE.txt",
+			"FOLGESUCHE.txt",
+			"KRANKHEIT_SUCHE.txt"
 	};
 	
 	public static void init() {
@@ -39,13 +46,14 @@ public class CreateTable {
 	}
 	
 	public static void clear() {
+		
 		Query query = new Query();
 		read(DROP_TABLES, query);
 		query.close();
 	}
 	
 	public static void create() {
-		
+
 		Query query = new Query();
 		for(String filename : TABLES) {
 			read(filename, query);
@@ -65,7 +73,7 @@ public class CreateTable {
 				if(batch(in, query)) {
 					Logger.getLogger("File Logger").info("Executed batch of " + filename);
 				} else {
-					Logger.getLogger("File Logger").warning("Could not execute batch of "
+					Logger.getLogger("File Logger").warning("Error while executing batch of "
 							+ filename);
 				}
 			} catch (FileNotFoundException e) {
@@ -96,11 +104,9 @@ public class CreateTable {
 	private static boolean batch(Scanner in, Query query) {
 		
 		LinkedList<String> statements = new LinkedList<String>();
-		
 		while(in.hasNextLine()) {
 			statements.add(in.nextLine());
 		}
-		
 		return query.executeBatch(statements);
 	}
 }

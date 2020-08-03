@@ -51,9 +51,7 @@ import org.jfree.chart.StandardChartTheme;
  */
 
 public class ChartPlotter {
-	
-	public static final boolean CREATE_NEW_TABLES = true;
-	
+		
 	public static final String INPUT_DIRECTORY = "./input/";
 	public static final String OUTPUT_DIRECTORY = "./output/";
 	public static final int CHART_WIDTH = 1000;
@@ -76,19 +74,19 @@ public class ChartPlotter {
 		fileLogger.setUseParentHandlers(false);
 		
 		Handler handler = new ConsoleHandler();
-		handler.setLevel(Level.FINER);
+		handler.setLevel(Level.INFO);
 		sqlLogger.addHandler(handler);
 		chrtLogger.addHandler(handler);
 		fileLogger.addHandler(handler);
 		
-		ChartPlotter plotter = new ChartPlotter(CREATE_NEW_TABLES);
+		ChartPlotter plotter = new ChartPlotter(true);
 		for(BirdFluChart chart : plotter.createCharts()) {
 			plotter.saveChart(chart);
 		}
 	}
 	
 	public ChartPlotter(boolean createNewTables) {
-		if(createNewTables) { CreateTable.create(); }
+		if(createNewTables) { CreateTable.init(); }
 	}
 	
 	/**
