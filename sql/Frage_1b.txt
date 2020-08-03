@@ -1,6 +1,0 @@
-LineChartPCM
-Täglicher Anteil von Suchen zum Thema "Vogelgrippe"
-Datum
-pcm (1/100000)
-select to_char(querydata.querytime, 'MM.DD'), count(distinct querydata.querytime) from aoldata.querydata join h5n1_terms on query like '%'||h5n1_terms.name||'%' group by to_char(querydata.querytime, 'MM.DD') order by 1
-select to_char(querydata.querytime, 'MM.DD'), count(distinct querydata.querytime) from aoldata.querydata group by to_char(querydata.querytime, 'MM.DD') order by 1

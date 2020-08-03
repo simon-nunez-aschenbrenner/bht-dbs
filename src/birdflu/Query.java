@@ -42,7 +42,7 @@ public class Query {
 		this.query = query;
 		try {
 			result = stmt.executeQuery(query);
-			Logger.getLogger("SQL Logger").info("Executed query: " + this.query);
+			Logger.getLogger("SQL Logger").info("Executed query: " + query);
 		} catch (SQLException e) {
 			Logger.getLogger("SQL Logger").warning("SQL Exception: " + e.getMessage());
 		}
@@ -61,7 +61,7 @@ public class Query {
 				if(i < 0) { batchSuccess = false; }
 				resultString += Integer.toString(i);
 			}
-			Logger.getLogger("SQL Logger").finer("Results: " + resultString);
+			Logger.getLogger("SQL Logger").fine("Results: " + resultString);
 			return batchSuccess;
 		} catch (SQLException e) {
 			Logger.getLogger("SQL Logger").warning("SQL Exception: " + e.getMessage());

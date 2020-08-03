@@ -1,7 +1,0 @@
-BarChart
-5
-Popularität aufgerufener Webseiten
-URLs
-Aufrufe
-1
-select website_categories.name, count(distinct querytime) from (select querydata.querytime, querydata.clickurl, websites.url, websites.category_id from (h5n1_terms join AOLDATA.querydata on query like '%'||h5n1_terms.name||'%'), websites), website_categories where clickurl = url and category_id = website_categories.id group by website_categories.name order by 2 desc;
