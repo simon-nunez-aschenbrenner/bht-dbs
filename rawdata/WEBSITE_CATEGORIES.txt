@@ -1,7 +1,0 @@
-WEBSITE_CATEGORIES
-ID, NAME
-ID INTEGER PRIMARY KEY, NAME VARCHAR(20)
-0, 'Nicht kategorisiert'
-1, 'Staatliche Behörde'
-2, 'Nachrichten'
-3, 'Privater Blog'

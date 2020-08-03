@@ -1,6 +1,0 @@
-H5N1_TERMS_A
-NAME
-NAME VARCHAR(10) PRIMARY KEY
-'bird'
-'avian'
-'fowl'
