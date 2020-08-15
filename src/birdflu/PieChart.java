@@ -35,11 +35,10 @@ public class PieChart implements BirdFluChart {
 		
 		PiePlot plot = new PiePlot(dataset);
 		plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} ({2})"));
-		plot.setInsets(new RectangleInsets(0.0, 5.0, 5.0, 5.0));
+		plot.setInsets(new RectangleInsets(0.0, 5.0, 5.0, 5.0)); 
 		plot.setDirection(Rotation.CLOCKWISE);
 		JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, false);
-        ChartPlotter.getTheme().apply(chart);
-        
+        new Theme().apply(chart);
         return chart;
 	}
 	
