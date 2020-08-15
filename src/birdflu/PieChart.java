@@ -7,6 +7,8 @@ import org.jfree.chart.JFreeChart;
 import org.jfree.chart.labels.StandardPieSectionLabelGenerator;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.ui.RectangleInsets;
+import org.jfree.chart.util.Rotation;
+import org.jfree.chart.util.SortOrder;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
 
@@ -17,10 +19,13 @@ public class PieChart implements BirdFluChart {
 	
 	protected JFreeChart chart;
 	protected String filename;
+	protected int threshold;
 	
-	private PieChart(String filename, HashMap<String, Integer> source, String title) {
+	private PieChart(String filename, HashMap<String, Integer> source, String title,
+			int threshold) {
 		
 		this.filename = filename;
+		this.threshold = threshold;
 		chart = initChart(source, title);
 	}
 	
@@ -29,9 +34,9 @@ public class PieChart implements BirdFluChart {
 		PieDataset dataset = initDataset(source);
 		
 		PiePlot plot = new PiePlot(dataset);
-		plot.setLabelGenerator(new StandardPieSectionLabelGenerator());
+		plot.setLabelGenerator(new StandardPieSectionLabelGenerator("{0} ({2})"));
 		plot.setInsets(new RectangleInsets(0.0, 5.0, 5.0, 5.0));
-		
+		plot.setDirection(Rotation.CLOCKWISE);
 		JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, false);
         ChartPlotter.getTheme().apply(chart);
         
@@ -41,16 +46,26 @@ public class PieChart implements BirdFluChart {
 	private PieDataset initDataset(HashMap<String, Integer> source) {
 		
 		DefaultPieDataset dataset = new DefaultPieDataset();
+		int other = 0;
 		
 		for(String key : source.keySet()) {
-			dataset.setValue(key, source.get(key));
+			Integer value = source.get(key);
+			if(value > threshold) {
+				dataset.setValue("\"" + key + "\"", value);
+			} else {
+				other += value;
+			}
 		}
+		if(other > 0) { dataset.setValue("Andere Suchbegriffe", other); }
+		
+		dataset.sortByValues(SortOrder.DESCENDING);
 		
 		return dataset;
 		
 	}
 	
-	public static PieChart createPieChart(String filename, Query query, String title) {
+	public static PieChart createPieChart(String filename, Query query, String title,
+			int threshold) {
 		
 		HashMap<String, Integer> source = null;
 		
@@ -64,7 +79,7 @@ public class PieChart implements BirdFluChart {
 		}
 		
 		if(source != null) {
-			return new PieChart(filename, source, title);
+			return new PieChart(filename, source, title, threshold);
 		} else {
 			Logger.getLogger("Chart Logger").warning
 			("Could not create PieChart for " + filename);

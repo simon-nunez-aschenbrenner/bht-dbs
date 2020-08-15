@@ -49,7 +49,7 @@ public class BarChart implements BirdFluChart {
 				dataset.addValue(value, key, "");
 			}
 		}
-				
+		
 		return dataset;
 		
 	}
