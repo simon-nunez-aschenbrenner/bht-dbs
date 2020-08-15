@@ -81,7 +81,7 @@ public class LineChart implements BirdFluChart {
         plot.setRenderer(renderer);
         
         JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT, plot, false);
-        ChartPlotter.getTheme().apply(chart);
+        new Theme().apply(chart);
 
         return chart;
 	}

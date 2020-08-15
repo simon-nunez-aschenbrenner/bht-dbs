@@ -1,7 +1,7 @@
-BarChart
+BarChart1
 0
 Suchen zum Thema "Vogelgrippe" mit Landesbezug
 Land
-Aufrufe
+Anzahl
 0
 SELECT LAND, COUNT(DISTINCT ZEITPUNKT) FROM H5N1_SUCHE WHERE LAND IS NOT NULL GROUP BY LAND ORDER BY 2 DESC

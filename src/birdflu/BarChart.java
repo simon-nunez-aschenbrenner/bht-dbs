@@ -1,11 +1,19 @@
 package birdflu;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
-import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.NumberAxis;
+import org.jfree.chart.axis.ValueAxis;
+import org.jfree.chart.labels.ItemLabelAnchor;
+import org.jfree.chart.labels.ItemLabelPosition;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.ui.TextAnchor;
 import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
@@ -32,26 +40,59 @@ public class BarChart implements BirdFluChart {
 		
 		CategoryDataset dataset = initDataset(source);
 		
-		JFreeChart chart = ChartFactory.createBarChart(title, categoryAxisLabel,
-				valueAxisLabel, dataset, orientation, false, false, false);
-        ChartPlotter.getTheme().apply(chart);
-        
+        CategoryAxis categoryAxis = new CategoryAxis(categoryAxisLabel);
+        ValueAxis valueAxis = new NumberAxis(valueAxisLabel);
+
+        BarRenderer renderer = new BarRenderer();
+        if (orientation == PlotOrientation.HORIZONTAL) {
+            ItemLabelPosition position1 = new ItemLabelPosition(
+                    ItemLabelAnchor.OUTSIDE3, TextAnchor.CENTER_LEFT);
+            renderer.setDefaultPositiveItemLabelPosition(position1);
+            ItemLabelPosition position2 = new ItemLabelPosition(
+                    ItemLabelAnchor.OUTSIDE9, TextAnchor.CENTER_RIGHT);
+            renderer.setDefaultNegativeItemLabelPosition(position2);
+        } else if (orientation == PlotOrientation.VERTICAL) {
+            ItemLabelPosition position1 = new ItemLabelPosition(
+                    ItemLabelAnchor.OUTSIDE12, TextAnchor.BOTTOM_CENTER);
+            renderer.setDefaultPositiveItemLabelPosition(position1);
+            ItemLabelPosition position2 = new ItemLabelPosition(
+                    ItemLabelAnchor.OUTSIDE6, TextAnchor.TOP_CENTER);
+            renderer.setDefaultNegativeItemLabelPosition(position2);
+        }
+
+        CategoryPlot plot = new CategoryPlot(dataset, categoryAxis, valueAxis,
+                renderer);
+        plot.setOrientation(orientation);
+        JFreeChart chart = new JFreeChart(title, JFreeChart.DEFAULT_TITLE_FONT,
+                plot, true);
+        new Theme().apply(chart);
         return chart;
 	}
 	
 	private CategoryDataset initDataset(HashMap<String, Integer> source) {
 		
-		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+//		Dataset lässt sich nicht sortieren, daher Umwandlung der HashMap in eine
+//		verschachtelte ArrayList mit anschließender Sortierung
 		
+		ArrayList<ArrayList<Object>> list = new ArrayList<ArrayList<Object>>();
 		for(String key : source.keySet()) {
 			Integer value = source.get(key);
 			if(value > threshold) {
-				dataset.addValue(value, key, "");
+				ArrayList<Object> element = new ArrayList<Object>();
+				element.add(key); // Index 0
+				element.add(value); // Index 1
+				list.add(element);
 			}
 		}
+		list.sort((ArrayList<Object> a, ArrayList<Object> b)
+				-> (Integer) b.get(1) - (Integer) a.get(1));
 		
+		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+		
+		for(ArrayList<Object> element : list) {
+			dataset.addValue((Integer) element.get(1), (String) element.get(0), "");
+		}
 		return dataset;
-		
 	}
 	
 	public static BarChart createBarChart(String filename, Query query, String title,
@@ -80,6 +121,66 @@ public class BarChart implements BirdFluChart {
 			return null;
 		}
 	}
+	
+	public static BarChart createBarChart2(String filename, Query refQuery, Query datQuery,
+			String title, String categoryAxisLabel, String valueAxisLabel, boolean horizontal,
+			int threshold) {
+		
+		HashMap<String, Integer> source = null;
+		PlotOrientation orientation =
+				(horizontal) ? PlotOrientation.HORIZONTAL : PlotOrientation.VERTICAL;
+		
+		try {
+			source = datQuery.getMap(KEY_COLUMN, VALUE_COLUMN);
+			source.put("VOGELGRIPPE", refQuery.getList(1).element());
+		} catch (NoDataException e) {
+			Logger.getLogger("Chart Logger").warning("Could not create BarChart for "
+					+ filename + "\nNoDataException: " + e.getMessage());
+		} finally {
+			datQuery.close();
+			refQuery.close();
+		}
+		
+		if(source != null) {
+			return new BarChart(filename, source, title, categoryAxisLabel, valueAxisLabel,
+					orientation, threshold);
+		} else {
+			Logger.getLogger("Chart Logger").warning
+			("Could not create BarChart for " + filename);
+			return null;
+		}
+	}
+	
+// TODO: createBarChart3	
+	
+//	public static BarChart createBarChart3(String filename, Query refQuery, Query datQuery,
+//			String title, String valueAxisLabel, String refLabel, String datLabel,
+//			boolean horizontal, int threshold) {
+//		
+//		HashMap<String, Integer> source = new HashMap<String, Integer>();
+//		PlotOrientation orientation =
+//				(horizontal) ? PlotOrientation.HORIZONTAL : PlotOrientation.VERTICAL;
+//		
+//		try {
+//			source.put(refLabel, refQuery.getList(1).element());
+//			source.put(datLabel, datQuery.getList(1).element());
+//		} catch (NoDataException e) {
+//			Logger.getLogger("Chart Logger").warning("Could not create BarChart for "
+//					+ filename + "\nNoDataException: " + e.getMessage());
+//		} finally {
+//			refQuery.close();
+//			datQuery.close();
+//		}
+//		
+//		if(source.size() > 1) {
+//			return new BarChart(filename, source, title, "", valueAxisLabel, orientation,
+//					threshold);
+//		} else {
+//			Logger.getLogger("Chart Logger").warning
+//			("Could not create BarChart for " + filename);
+//			return null;
+//		}
+//	}
 	
 	@Override
 	public JFreeChart getChart() {

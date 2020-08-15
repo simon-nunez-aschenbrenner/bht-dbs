@@ -12,11 +12,7 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import org.jfree.chart.ChartTheme;
 import org.jfree.chart.ChartUtils;
-import org.jfree.chart.StandardChartTheme;
-import org.jfree.chart.plot.DefaultDrawingSupplier;
-import org.jfree.chart.plot.PieLabelLinkStyle;
 
 /**
  * Class for generating charts for the semester project "Bird Flu"
@@ -149,7 +145,7 @@ public class ChartPlotter {
 		String title = in.nextLine();
 		
 		switch (chartType) {
-			case "LineChartPCM":
+			case "LineChartPCM": // Für: Anzahl der Suchanfragen (Frage 1B)
 				String pcmXaxis = in.nextLine();
 				String pcmYaxis = in.nextLine();
 				String dividendQuery = in.nextLine();
@@ -158,19 +154,47 @@ public class ChartPlotter {
 				return LineChart.createLineChartPCM
 						(filename, new Query(dividendQuery), new Query(divisorQuery),
 								title, pcmXaxis, pcmYaxis);
-			case "PieChart":
+			case "PieChart": // Für: Popularität der Suchbegriffe (Frage 1A)
 				String pieQuery = in.nextLine();
 				Logger.getLogger("File Logger").fine(filename + " read succesfully");
 				return PieChart.createPieChart(filename, new Query(pieQuery), title,
 						threshold);
-			case "BarChart":
-				String catAxis = in.nextLine();
-				String valAxis = in.nextLine();
-				boolean horizontal = (Integer.parseInt(in.nextLine()) != 0) ? true : false;
-				String barQuery = in.nextLine();
+			case "BarChart1": // Für: Landesbezüge (Frage 2), Webseitenkategorien (Frage 4)
+				String catAxis1 = in.nextLine();
+				String valAxis1 = in.nextLine();
+				boolean horizontal1 = (Integer.parseInt(in.nextLine()) != 0) ? true : false;
+				String datQuery1 = in.nextLine();
 				Logger.getLogger("File Logger").fine(filename + " read succesfully");
-				return BarChart.createBarChart(filename, new Query(barQuery), title,
-						catAxis, valAxis, horizontal, threshold);
+				return BarChart.createBarChart(filename, new Query(datQuery1), title,
+						catAxis1, valAxis1, horizontal1, threshold);
+			case "BarChart2": // Für: Vergleich mit anderen Krankheiten (Frage 9)
+				String catAxis2 = in.nextLine();
+				String valAxis2 = in.nextLine();
+				String refQuery2 = in.nextLine();
+				String datQuery2 = in.nextLine();
+				Logger.getLogger("File Logger").fine(filename + " read succesfully");
+				return BarChart.createBarChart2(filename, new Query(refQuery2),
+						new Query(datQuery2), title, catAxis2, valAxis2, true, threshold);
+			case "BarChart3": // Für: Folgesuchen (Fragen 6-8)
+				String fullTitle = "Folgesuchen zum Thema " + title;
+				String valAxis3 = "Anzahl individueller Nutzer*innen";
+				String refLabel3 = "... die nach der Vogelgrippe gesucht haben";
+				String refQuery3 = in.nextLine();
+				LinkedList<String[]> data3 = new LinkedList<String[]>();
+				while(in.hasNextLine()) {
+					String[] element = new String[2];
+					element[0] = "... und auch nach Begriffen zum Thema " + in.nextLine()
+						+ " gesucht haben";
+					element[1] = in.nextLine();
+					data3.add(element);
+				}
+				Logger.getLogger("File Logger").fine(filename + " read succesfully");
+				return null;
+// TODO: createBarChart3
+
+//				return BarChart.createBarChart3(filename, new Query(refQuery3),
+//						new Query(datQuery3), fullTitle, valAxis3, refLabel3, datLabel3,
+//						false, threshold);
 			default:
 				return null;
 		}
@@ -197,32 +221,5 @@ public class ChartPlotter {
 			Logger.getLogger("File Logger").severe
 			("Could not save chart because it does not exist");
 		}
-	}
-	
-	public static ChartTheme getTheme() {
-		StandardChartTheme theme = new StandardChartTheme("Bird Flu");
-		theme.setTitlePaint(Colors.TEXT);
-        theme.setSubtitlePaint(Colors.TEXT);
-        theme.setLegendBackgroundPaint(Colors.BACKGROUND);
-        theme.setLegendItemPaint(Colors.TEXT);
-        theme.setChartBackgroundPaint(Colors.BACKGROUND);
-        theme.setPlotBackgroundPaint(Colors.BACKGROUND);
-        theme.setPlotOutlinePaint(Colors.BACKGROUND);
-        theme.setBaselinePaint(Colors.LINE);
-        theme.setLabelLinkStyle(PieLabelLinkStyle.STANDARD);
-        theme.setLabelLinkPaint(Colors.LINE);
-        theme.setTickLabelPaint(Colors.TEXT);
-        theme.setAxisLabelPaint(Colors.TEXT);
-        theme.setShadowVisible(false);
-        theme.setItemLabelPaint(Colors.TEXT);
-        theme.setDrawingSupplier(new DefaultDrawingSupplier(
-                Colors.FILL_SEQUENCE, Colors.FILL_SEQUENCE,
-                DefaultDrawingSupplier.DEFAULT_OUTLINE_PAINT_SEQUENCE,
-                DefaultDrawingSupplier.DEFAULT_STROKE_SEQUENCE,
-                DefaultDrawingSupplier.DEFAULT_OUTLINE_STROKE_SEQUENCE,
-                DefaultDrawingSupplier.DEFAULT_SHAPE_SEQUENCE));
-        theme.setGridBandPaint(Colors.LINE);
-        return theme;
-//		return StandardChartTheme.createDarknessTheme();
 	}
 }
