@@ -15,6 +15,8 @@ import java.util.logging.Logger;
 import org.jfree.chart.ChartTheme;
 import org.jfree.chart.ChartUtils;
 import org.jfree.chart.StandardChartTheme;
+import org.jfree.chart.plot.DefaultDrawingSupplier;
+import org.jfree.chart.plot.PieLabelLinkStyle;
 
 /**
  * Class for generating charts for the semester project "Bird Flu"
@@ -79,14 +81,14 @@ public class ChartPlotter {
 		chrtLogger.addHandler(handler);
 		fileLogger.addHandler(handler);
 		
-		ChartPlotter plotter = new ChartPlotter(true);
+		ChartPlotter plotter = new ChartPlotter(false);
 		for(BirdFluChart chart : plotter.createCharts()) {
 			plotter.saveChart(chart);
 		}
 	}
 	
 	public ChartPlotter(boolean createNewTables) {
-		if(createNewTables) { CreateTable.init(); }
+		if(createNewTables) { CreateTable.create(); }
 	}
 	
 	/**
@@ -143,10 +145,11 @@ public class ChartPlotter {
 			throws NoSuchElementException, NumberFormatException {
 		
 		String chartType = in.nextLine();
+		int threshold = Integer.parseInt(in.nextLine());
+		String title = in.nextLine();
 		
 		switch (chartType) {
 			case "LineChartPCM":
-				String pcmTitle = in.nextLine();
 				String pcmXaxis = in.nextLine();
 				String pcmYaxis = in.nextLine();
 				String dividendQuery = in.nextLine();
@@ -154,21 +157,19 @@ public class ChartPlotter {
 				Logger.getLogger("File Logger").fine(filename + " read succesfully");
 				return LineChart.createLineChartPCM
 						(filename, new Query(dividendQuery), new Query(divisorQuery),
-								pcmTitle, pcmXaxis, pcmYaxis);
+								title, pcmXaxis, pcmYaxis);
 			case "PieChart":
-				String pieTitle = in.nextLine();
 				String pieQuery = in.nextLine();
 				Logger.getLogger("File Logger").fine(filename + " read succesfully");
-				return PieChart.createPieChart(filename, new Query(pieQuery), pieTitle);
+				return PieChart.createPieChart(filename, new Query(pieQuery), title,
+						threshold);
 			case "BarChart":
-				int threshold = Integer.parseInt(in.nextLine());
-				String barTitle = in.nextLine();
 				String catAxis = in.nextLine();
 				String valAxis = in.nextLine();
 				boolean horizontal = (Integer.parseInt(in.nextLine()) != 0) ? true : false;
 				String barQuery = in.nextLine();
 				Logger.getLogger("File Logger").fine(filename + " read succesfully");
-				return BarChart.createBarChart(filename, new Query(barQuery), barTitle,
+				return BarChart.createBarChart(filename, new Query(barQuery), title,
 						catAxis, valAxis, horizontal, threshold);
 			default:
 				return null;
@@ -199,6 +200,29 @@ public class ChartPlotter {
 	}
 	
 	public static ChartTheme getTheme() {
-		return StandardChartTheme.createDarknessTheme();
+		StandardChartTheme theme = new StandardChartTheme("Bird Flu");
+		theme.setTitlePaint(Colors.TEXT);
+        theme.setSubtitlePaint(Colors.TEXT);
+        theme.setLegendBackgroundPaint(Colors.BACKGROUND);
+        theme.setLegendItemPaint(Colors.TEXT);
+        theme.setChartBackgroundPaint(Colors.BACKGROUND);
+        theme.setPlotBackgroundPaint(Colors.BACKGROUND);
+        theme.setPlotOutlinePaint(Colors.BACKGROUND);
+        theme.setBaselinePaint(Colors.LINE);
+        theme.setLabelLinkStyle(PieLabelLinkStyle.STANDARD);
+        theme.setLabelLinkPaint(Colors.LINE);
+        theme.setTickLabelPaint(Colors.TEXT);
+        theme.setAxisLabelPaint(Colors.TEXT);
+        theme.setShadowVisible(false);
+        theme.setItemLabelPaint(Colors.TEXT);
+        theme.setDrawingSupplier(new DefaultDrawingSupplier(
+                Colors.FILL_SEQUENCE, Colors.FILL_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_OUTLINE_PAINT_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_STROKE_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_OUTLINE_STROKE_SEQUENCE,
+                DefaultDrawingSupplier.DEFAULT_SHAPE_SEQUENCE));
+        theme.setGridBandPaint(Colors.LINE);
+        return theme;
+//		return StandardChartTheme.createDarknessTheme();
 	}
 }

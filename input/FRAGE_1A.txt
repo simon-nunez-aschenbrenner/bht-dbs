@@ -1,3 +1,4 @@
 PieChart
+10
 Popularität von Suchbegriffen zum Thema "Vogelgrippe"
 SELECT BEGRIFF, COUNT(DISTINCT ZEITPUNKT) FROM H5N1_SUCHE GROUP BY BEGRIFF ORDER BY 2 DESC
