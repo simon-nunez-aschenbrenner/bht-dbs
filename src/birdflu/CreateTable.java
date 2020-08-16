@@ -18,7 +18,6 @@ import java.util.logging.Logger;
  */
 public class CreateTable {
 	
-	public static final String INPUT_DIRECTORY = "./tables/";
 	public static final String DROP_TABLES = "DROP_TABLES.txt";
 	public static final String[] TABLES = {
 			"H5N1_BEGRIFF_A.txt",
@@ -37,7 +36,8 @@ public class CreateTable {
 			"SEQUENCE.txt",
 			"H5N1_SUCHE.txt",
 			"FOLGESUCHE.txt",
-			"KRANKHEIT_SUCHE.txt"
+			"KRANKHEIT_SUCHE.txt",
+			"FOLGESUCHE_UEBERSICHT.txt"
 	};
 	
 	public static void init() {
@@ -63,7 +63,7 @@ public class CreateTable {
 	
 	private static void read(String filename, Query query) {
 		
-		File file = new File(INPUT_DIRECTORY + filename);
+		File file = new File("./tables/" + filename);
 		Scanner in = null;
 		
 		if(new InputFileFilter().accept(file)) {

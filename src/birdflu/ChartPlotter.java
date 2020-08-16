@@ -49,11 +49,11 @@ import org.jfree.chart.ChartUtils;
  */
 
 public class ChartPlotter {
-		
-	public static final String INPUT_DIRECTORY = "./input/";
-	public static final String OUTPUT_DIRECTORY = "./output/";
+	
+	public static final boolean INIT_TABLES = false;
 	public static final int CHART_WIDTH = 1000;
 	public static final int CHART_HEIGHT = 500;
+	public static final Level LOG_LEVEL = Level.INFO;
 	
 	public static void main(String[] args) {
 		
@@ -72,19 +72,19 @@ public class ChartPlotter {
 		fileLogger.setUseParentHandlers(false);
 		
 		Handler handler = new ConsoleHandler();
-		handler.setLevel(Level.INFO);
+		handler.setLevel(LOG_LEVEL);
 		sqlLogger.addHandler(handler);
 		chrtLogger.addHandler(handler);
 		fileLogger.addHandler(handler);
 		
-		ChartPlotter plotter = new ChartPlotter(false);
+		ChartPlotter plotter = new ChartPlotter(INIT_TABLES);
 		for(BirdFluChart chart : plotter.createCharts()) {
 			plotter.saveChart(chart);
 		}
 	}
 	
 	public ChartPlotter(boolean createNewTables) {
-		if(createNewTables) { CreateTable.create(); }
+		if(createNewTables) { CreateTable.init(); }
 	}
 	
 	/**
@@ -95,14 +95,14 @@ public class ChartPlotter {
 	public LinkedList<BirdFluChart> createCharts() {
 		
 		LinkedList<BirdFluChart> chartList = new LinkedList<BirdFluChart>();
-		File dir = new File(INPUT_DIRECTORY);
+		File dir = new File("./input/");
 		Scanner in = null;
 		
 		for(File file : dir.listFiles(new InputFileFilter())) {
 			String filename = file.getName();
-			filename = (filename.length() > 11) ?
-					filename.substring(0, 8) :
-					filename.substring(0, 7) ;
+			if(filename.length() == 11) { filename = filename.substring(0, 7); };
+			if(filename.length() == 12) { filename = filename.substring(0, 8); };
+			if(filename.length() == 13) { filename = filename.substring(0, 9); };
 			Logger.getLogger("File Logger").fine("Reading " + filename);
 			try {
 				in = new Scanner(file);
@@ -146,55 +146,35 @@ public class ChartPlotter {
 		
 		switch (chartType) {
 			case "LineChartPCM": // Für: Anzahl der Suchanfragen (Frage 1B)
-				String pcmXaxis = in.nextLine();
-				String pcmYaxis = in.nextLine();
+				String xAxis = in.nextLine();
+				String yAxis = in.nextLine();
 				String dividendQuery = in.nextLine();
 				String divisorQuery = in.nextLine();
 				Logger.getLogger("File Logger").fine(filename + " read succesfully");
 				return LineChart.createLineChartPCM
 						(filename, new Query(dividendQuery), new Query(divisorQuery),
-								title, pcmXaxis, pcmYaxis);
+								title, xAxis, yAxis);
 			case "PieChart": // Für: Popularität der Suchbegriffe (Frage 1A)
 				String pieQuery = in.nextLine();
 				Logger.getLogger("File Logger").fine(filename + " read succesfully");
 				return PieChart.createPieChart(filename, new Query(pieQuery), title,
 						threshold);
-			case "BarChart1": // Für: Landesbezüge (Frage 2), Webseitenkategorien (Frage 4)
+			case "BarChart1": // Für: Landesbezüge (Frage 2) und Webseitenkategorien (Frage 4)
 				String catAxis1 = in.nextLine();
 				String valAxis1 = in.nextLine();
-				boolean horizontal1 = (Integer.parseInt(in.nextLine()) != 0) ? true : false;
-				String datQuery1 = in.nextLine();
+				boolean horizontal = (Integer.parseInt(in.nextLine()) != 0) ? true : false;
+				String barQuery = in.nextLine();
 				Logger.getLogger("File Logger").fine(filename + " read succesfully");
-				return BarChart.createBarChart(filename, new Query(datQuery1), title,
-						catAxis1, valAxis1, horizontal1, threshold);
-			case "BarChart2": // Für: Vergleich mit anderen Krankheiten (Frage 9)
+				return BarChart.createBarChart1(filename, barQuery, title, catAxis1, valAxis1,
+						horizontal, threshold);
+			case "BarChart2": // Für: Andere Krankheiten (Frage 9) und Folgesuchen (Fragen 6-8)
 				String catAxis2 = in.nextLine();
 				String valAxis2 = in.nextLine();
-				String refQuery2 = in.nextLine();
-				String datQuery2 = in.nextLine();
+				String refQuery = in.nextLine();
+				String datQuery = in.nextLine();
 				Logger.getLogger("File Logger").fine(filename + " read succesfully");
-				return BarChart.createBarChart2(filename, new Query(refQuery2),
-						new Query(datQuery2), title, catAxis2, valAxis2, true, threshold);
-			case "BarChart3": // Für: Folgesuchen (Fragen 6-8)
-				String fullTitle = "Folgesuchen zum Thema " + title;
-				String valAxis3 = "Anzahl individueller Nutzer*innen";
-				String refLabel3 = "... die nach der Vogelgrippe gesucht haben";
-				String refQuery3 = in.nextLine();
-				LinkedList<String[]> data3 = new LinkedList<String[]>();
-				while(in.hasNextLine()) {
-					String[] element = new String[2];
-					element[0] = "... und auch nach Begriffen zum Thema " + in.nextLine()
-						+ " gesucht haben";
-					element[1] = in.nextLine();
-					data3.add(element);
-				}
-				Logger.getLogger("File Logger").fine(filename + " read succesfully");
-				return null;
-// TODO: createBarChart3
-
-//				return BarChart.createBarChart3(filename, new Query(refQuery3),
-//						new Query(datQuery3), fullTitle, valAxis3, refLabel3, datLabel3,
-//						false, threshold);
+				return BarChart.createBarChart2(filename, refQuery, datQuery, title, catAxis2,
+						valAxis2, true, threshold);
 			default:
 				return null;
 		}
@@ -208,7 +188,7 @@ public class ChartPlotter {
 	public void saveChart(BirdFluChart chart) {
 		if(chart != null) {
 			try {
-				ChartUtils.saveChartAsPNG(new File(OUTPUT_DIRECTORY + chart.getFilename()
+				ChartUtils.saveChartAsPNG(new File("./output/" + chart.getFilename()
 				+ ".png"), chart.getChart(), CHART_WIDTH, CHART_HEIGHT);
 				Logger.getLogger("File Logger").fine
 				("Chart for " + chart.getFilename() + " saved succesfully");
