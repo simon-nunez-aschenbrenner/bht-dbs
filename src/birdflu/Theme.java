@@ -4,10 +4,6 @@ import org.jfree.chart.StandardChartTheme;
 import org.jfree.chart.plot.DefaultDrawingSupplier;
 import org.jfree.chart.plot.PieLabelLinkStyle;
 
-/**
- * @author simonaschenbrenner
- *
- */
 public class Theme extends StandardChartTheme {
 	
 	public Theme() {
