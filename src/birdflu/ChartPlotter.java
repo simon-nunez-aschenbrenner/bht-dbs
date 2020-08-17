@@ -22,28 +22,21 @@ import org.jfree.chart.ChartUtils;
  * @author Simon Aschenbrenner, Luis Rieke, Paul Gronemeyer, Büsra Bagci
  * 
  * Charts are generated using:
- * 
  * JFreeChart : a free chart library for the Java(tm) platform
- * 
  * (C) Copyright 2000-2017, by Object Refinery Limited and Contributors.
- *
  * Project Info:  http://www.jfree.org/jfreechart/index.html
- *
  * This library is free software; you can redistribute it and/or modify it
  * under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation; either version 2.1 of the License, or
  * (at your option) any later version.
- *
  * This library is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
  * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
  * License for more details.
- *
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
  * USA.
- *
  * [Oracle and Java are registered trademarks of Oracle and/or its affiliates.
  * Other names may be trademarks of their respective owners.]
  */
@@ -51,27 +44,23 @@ import org.jfree.chart.ChartUtils;
 public class ChartPlotter {
 	
 	public static final boolean INIT_TABLES = false;
-	public static final int CHART_WIDTH = 1000;
-	public static final int CHART_HEIGHT = 500;
+	public static final int CHART_WIDTH = 1500;
+	public static final int CHART_HEIGHT = 750;
 	public static final Level LOG_LEVEL = Level.INFO;
 	
 	public static void main(String[] args) {
-		
 		Locale.setDefault(Locale.US);
-		
 		Logger sqlLogger  = Logger.getLogger("SQL Logger");
 		Logger chrtLogger = Logger.getLogger("Chart Logger");
 		Logger fileLogger = Logger.getLogger("File Logger");
-		
 		sqlLogger.setLevel(Level.ALL);
 		chrtLogger.setLevel(Level.ALL);
 		fileLogger.setLevel(Level.ALL);
-		
 		sqlLogger.setUseParentHandlers(false);
 		chrtLogger.setUseParentHandlers(false);
 		fileLogger.setUseParentHandlers(false);
-		
 		Handler handler = new ConsoleHandler();
+		handler.setFormatter(new FluFormatter());
 		handler.setLevel(LOG_LEVEL);
 		sqlLogger.addHandler(handler);
 		chrtLogger.addHandler(handler);

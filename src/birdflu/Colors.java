@@ -10,8 +10,7 @@ public final class Colors {
 	protected static final Paint LINE = Color.GRAY;
 	
 	protected static final Paint[] FILL_SEQUENCE = {
-			Color.BLUE, Color.CYAN, Color.GREEN, Color.YELLOW, Color.ORANGE,
-			Color.RED, Color.MAGENTA, Color.PINK
-			};
-
+			new Color( 46, 211, 101), new Color(212, 209,  61),
+			new Color(204, 123,  59), new Color(204,  75,  58), new Color(204,  57, 163),
+			new Color(136,  57, 204), new Color( 57,  66, 204), new Color( 57, 153, 204)};
 }
