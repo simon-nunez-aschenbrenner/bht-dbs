@@ -16,6 +16,7 @@ import java.util.logging.Logger;
  * 
  * @author Simon Aschenbrenner, Luis Rieke, Paul Gronemeyer, Büsra Bagci
  */
+
 public class Query {
 	
 	protected String query;
@@ -46,7 +47,7 @@ public class Query {
 		this.query = query;
 		try {
 			result = stmt.executeQuery(query);
-			Logger.getLogger("SQL Logger").fine("Executed query: " + query);
+			Logger.getLogger("SQL Logger").finer("Executed query: " + query);
 		} catch (SQLException e) {
 			Logger.getLogger("SQL Logger").warning("SQL Exception: " + e.getMessage());
 		}
@@ -86,7 +87,13 @@ public class Query {
 		
 		try {
 			while (result.next()) {
-				list.add(result.getInt(column));
+				Integer value = result.getInt(column);
+				if (result.wasNull()) {
+					Logger.getLogger("SQL Logger").finest("Last value read was null");
+				}
+				Logger.getLogger("SQL Logger").finest(
+						String.format("Last read value: %d", value));
+				list.add(value);
 			}
 		} catch (SQLException e) {
 			Logger.getLogger("SQL Logger").warning("SQL Exception: " + e.getMessage());
@@ -104,8 +111,16 @@ public class Query {
 		try {
 			while (result.next()) {
 				String key = result.getString(keyColumn);
+				if (result.wasNull()) {
+					Logger.getLogger("SQL Logger").finest("Last key read was null");
+				}
 				Integer value = result.getInt(valueColumn);
-				if(key != null && value != null) { map.put(key, value); }
+				if (result.wasNull()) {
+					Logger.getLogger("SQL Logger").finest("Last value read was null");
+				}
+				Logger.getLogger("SQL Logger").finest(
+						String.format("Last read key/value pair: %s %d", key, value));
+				if(key != null) { map.put(key, value); }
 			}
 		} catch (SQLException e) {
 			Logger.getLogger("SQL Logger").warning("SQL Exception: " + e.getMessage());

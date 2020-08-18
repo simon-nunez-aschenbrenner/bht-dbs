@@ -9,16 +9,16 @@ public class InputFileFilter implements FileFilter {
 	@Override
 	public boolean accept(File pathname) {
 		if(pathname.isDirectory() || pathname.isHidden()) {
-			Logger.getLogger("File Logger").finer
+			Logger.getLogger("File Logger").finest
 			("Filtered out directory or hidden file: " + pathname.getName());
 			return false;
 		}
 		if(pathname.getName().endsWith(".txt")) {
-			Logger.getLogger("File Logger").finer("Accepted .txt file for input: "
+			Logger.getLogger("File Logger").finest("Accepted .txt file for input: "
 					+ pathname.getName());
 			return true;
 		}
-		Logger.getLogger("File Logger").finer("Filtered out unknown filetype: "
+		Logger.getLogger("File Logger").finest("Filtered out unknown filetype: "
 				+ pathname.getName());
 		return false;
 	}

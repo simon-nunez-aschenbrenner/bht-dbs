@@ -1,3 +1,6 @@
+/**
+ * 
+ */
 package birdflu;
 
 import java.util.ArrayList;
@@ -18,49 +21,29 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 /**
- * 
- * @author Simon Aschenbrenner, Luis Rieke, Paul Gronemeyer, Büsra Bagci
+ * @author simonaschenbrenner
  *
- * Charts are generated using:
- * JFreeChart : a free chart library for the Java(tm) platform
- * (C) Copyright 2000-2017, by Object Refinery Limited and Contributors.
- * Project Info:  http://www.jfree.org/jfreechart/index.html
- * This library is free software; you can redistribute it and/or modify it
- * under the terms of the GNU Lesser General Public License as published by
- * the Free Software Foundation; either version 2.1 of the License, or
- * (at your option) any later version.
- * This library is distributed in the hope that it will be useful, but
- * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
- * or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
- * License for more details.
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
- * USA.
- * [Oracle and Java are registered trademarks of Oracle and/or its affiliates.
- * Other names may be trademarks of their respective owners.]
  */
+public class GroupedBarChart implements BirdFluChart {
 
-public class BarChart implements BirdFluChart {
-
-	public static final String REF_LABEL = "VOGELGRIPPE";
 	public static final int KEY_COLUMN = 1;
 	public static final int VALUE_COLUMN = 2;
+	public static final int MAIN_VALUE = VALUE_COLUMN;
 	
 	protected JFreeChart chart;
 	protected String filename;
 	protected int threshold;
 	
-	private BarChart(String filename, HashMap<String, Integer> source, String title,
-			String categoryAxisLabel, String valueAxisLabel, PlotOrientation orientation,
-			int threshold) {
+	private GroupedBarChart(String filename, HashMap<String, ArrayList<Double>> source,
+			String title, String categoryAxisLabel, String valueAxisLabel, PlotOrientation
+			orientation, int threshold) {
 		
 		this.filename = filename;
 		this.threshold = threshold;
 		chart = initChart(source, title, categoryAxisLabel, valueAxisLabel, orientation);
 	}
 	
-	private JFreeChart initChart(HashMap<String, Integer> source, String title,
+	private JFreeChart initChart(HashMap<String, ArrayList<Double>> source, String title,
 			String categoryAxisLabel, String valueAxisLabel, PlotOrientation orientation) {
 		
 		CategoryDataset dataset = initDataset(source);
@@ -94,83 +77,102 @@ public class BarChart implements BirdFluChart {
         return chart;
 	}
 	
-	private CategoryDataset initDataset(HashMap<String, Integer> source) {
+	private CategoryDataset initDataset(HashMap<String, ArrayList<Double>> source) {
 		
 //		Dataset lässt sich nicht sortieren, daher Umwandlung der HashMap in eine verschachtelte
 //		ArrayList mit anschließender Sortierung nach value (Index 1)
 		
 		ArrayList<ArrayList<Object>> list = new ArrayList<ArrayList<Object>>();
 		for(String key : source.keySet()) {
-			Integer value = source.get(key);
-			if(value > threshold) {
+			Integer mainValue = Integer.valueOf(
+					(int) (source.get(key).get(MAIN_VALUE)*100));
+			if(threshold < 1 || mainValue > threshold) {
 				ArrayList<Object> element = new ArrayList<Object>();
 				element.add(key); // Index 0
-				element.add(value); // Index 1
+				element.addAll(source.get(key)); // Indizes 1-3
 				list.add(element);
 			}
 		}
-		list.sort((ArrayList<Object> a, ArrayList<Object> b)
-				-> (Integer) b.get(1) - (Integer) a.get(1));
+//		list.sort((ArrayList<Object> a, ArrayList<Object> b)
+//				-> (int) ((Double) b.get(MAIN_VALUE) - (Double) a.get(MAIN_VALUE)));
 		
 		DefaultCategoryDataset dataset = new DefaultCategoryDataset();
 		
 		for(ArrayList<Object> element : list) {
-			dataset.addValue((Integer) element.get(1), (String) element.get(0), "");
+			dataset.addValue((Double) element.get(1), "Suchen", (String) element.get(0));
+			dataset.addValue((Double) element.get(2), "Infizierte", (String) element.get(0));
+			dataset.addValue((Double) element.get(3), "Tote", (String) element.get(0));
 		}
 		return dataset;
 	}
 	
-	public static BarChart createBarChart1(String filename, String bars, String title,
-			String categoryAxisLabel, String valueAxisLabel, boolean horizontal,
-			int threshold) {
+	public static GroupedBarChart createGroupedBarChart(String filename, String c1r, String
+			c1d, String c2r, String c2d, String c3r, String c3d, String title, String
+			categoryAxisLabel, String valueAxisLabel, boolean horizontal, int threshold) {
 		
-		HashMap<String, Integer> source = null;
+		HashMap<String, ArrayList<Double>> source = new HashMap<String, ArrayList<Double>>();
 		PlotOrientation orientation =
 				(horizontal) ? PlotOrientation.HORIZONTAL : PlotOrientation.VERTICAL;
-		Query query = new Query(bars);
+		Query c1rQuery = new Query(c1r);
+		Query c1dQuery = new Query(c1d);
+		Query c2rQuery = new Query(c2r);
+		Query c2dQuery = new Query(c2d);
+		Query c3rQuery = new Query(c3r);
+		Query c3dQuery = new Query(c3d);
 		
 		try {
-			source = query.getMap(KEY_COLUMN, VALUE_COLUMN);
+			HashMap<String, Integer> c1dat = c1dQuery.getMap(KEY_COLUMN, VALUE_COLUMN);
+			HashMap<String, Integer> c2dat = c2dQuery.getMap(KEY_COLUMN, VALUE_COLUMN);
+			HashMap<String, Integer> c3dat = c3dQuery.getMap(KEY_COLUMN, VALUE_COLUMN);
+
+			Double c1ref = c1rQuery.getList(KEY_COLUMN).element().doubleValue();
+			Double c2ref = c2rQuery.getList(KEY_COLUMN).element().doubleValue();
+			Double c3ref = c3rQuery.getList(KEY_COLUMN).element().doubleValue();
+
+			for(String key : c1dat.keySet()) {
+				ArrayList<Double> valueList = new ArrayList<Double>(3);
+				Double value = (c1dat.get(key) != null) ?
+						c1dat.get(key).doubleValue()/c1ref : 0.0;
+				valueList.add(0, value);
+				source.put(key, valueList);
+			}
+			for(String key : c2dat.keySet()) {
+				Double value = (c2dat.get(key) != null) ?
+						c2dat.get(key).doubleValue()/c2ref : 0.0;
+				source.get(key).add(1, value);
+			}
+			for(String key : c3dat.keySet()) {
+				Double value = (c3dat.get(key) != null) ?
+						c3dat.get(key).doubleValue()/c3ref : 0.0;
+				source.get(key).add(2, value);
+			}
 		} catch (NoDataException e) {
 			Logger.getLogger("Chart Logger").warning("Could not create BarChart for "
 					+ filename + "\nNoDataException: " + e.getMessage());
 		} finally {
-			query.close();
+			c1rQuery.close();
+			c1dQuery.close();
+			c2rQuery.close();
+			c2dQuery.close();
+			c3rQuery.close();
+			c3dQuery.close();
 		}
 		
-		if(source != null) {
-			return new BarChart(filename, source, title, categoryAxisLabel, valueAxisLabel,
-					orientation, threshold);
-		} else {
-			Logger.getLogger("Chart Logger").warning
-			("Could not create BarChart for " + filename + "\nSource map not complete");
-			return null;
+		boolean sourceMapComplete = (source.size() > 0) ? true : false;
+		if (sourceMapComplete) {
+			for(String key : source.keySet()) {
+				if(!sourceMapComplete) { break; }
+				for(Double value : source.get(key)) {
+					if(!sourceMapComplete) { break; }
+					if(value == null) {
+						sourceMapComplete = false;
+					}
+				}
+			}
 		}
-	}
-	
-	public static BarChart createBarChart2(String filename, String refBar, String datBars,
-			String title, String categoryAxisLabel, String valueAxisLabel, boolean horizontal,
-			int threshold) {
-		
-		HashMap<String, Integer> source = null;
-		PlotOrientation orientation =
-				(horizontal) ? PlotOrientation.HORIZONTAL : PlotOrientation.VERTICAL;
-		Query refQuery = new Query(refBar);
-		Query datQuery = new Query(datBars);
-		
-		try {
-			source = datQuery.getMap(KEY_COLUMN, VALUE_COLUMN);
-			source.put(REF_LABEL, refQuery.getList(KEY_COLUMN).element());
-		} catch (NoDataException e) {
-			Logger.getLogger("Chart Logger").warning("Could not create BarChart for "
-					+ filename + "\nNoDataException: " + e.getMessage());
-		} finally {
-			datQuery.close();
-			refQuery.close();
-		}
-		
-		if(source != null) {
-			return new BarChart(filename, source, title, categoryAxisLabel, valueAxisLabel,
+
+		if(sourceMapComplete) {
+			return new GroupedBarChart(filename, source, title, categoryAxisLabel, valueAxisLabel,
 					orientation, threshold);
 		} else {
 			Logger.getLogger("Chart Logger").warning
@@ -188,4 +190,5 @@ public class BarChart implements BirdFluChart {
 	public String getFilename() {
 		return filename;
 	}
+
 }
