@@ -15,6 +15,7 @@ import java.util.logging.Logger;
  * 
  * @author Simon Aschenbrenner, Luis Rieke, Paul Gronemeyer, Büsra Bagci
  */
+
 public final class CreateTable {
 	
 	public static final String DROP_TABLES = "DROP_TABLES.txt";
@@ -32,11 +33,12 @@ public final class CreateTable {
 			"FOLGE_BEGRIFF.txt",
 			"KRANKHEIT.txt",
 			"NUTZER_IN.txt",
-			"SEQUENCE.txt",
+			"SEQUENCE.txt", // Sequence
 			"H5N1_SUCHE.txt",
 			"FOLGESUCHE.txt",
 			"KRANKHEIT_SUCHE.txt",
-			"FOLGESUCHE_UEBERSICHT.txt"
+			"FOLGESUCHE_UEBERSICHT.txt", // View
+			"SUCHEN_VS_FAELLE.txt" // View
 	};
 	
 	/**
@@ -83,7 +85,7 @@ public final class CreateTable {
 		Scanner in = null;
 		
 		if(new InputFileFilter().accept(file)) {
-			Logger.getLogger("File Logger").fine("Reading " + filename);
+			Logger.getLogger("File Logger").finer("Reading " + filename);
 			try {
 				in = new Scanner(file);
 				if(batch(in, query)) {

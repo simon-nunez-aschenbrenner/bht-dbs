@@ -30,5 +30,4 @@ public class Theme extends StandardChartTheme {
                 DefaultDrawingSupplier.DEFAULT_SHAPE_SEQUENCE));
         setGridBandPaint(Colors.LINE);
 	}
-
 }
