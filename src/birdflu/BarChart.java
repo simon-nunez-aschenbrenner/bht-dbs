@@ -18,6 +18,7 @@ import org.jfree.data.category.CategoryDataset;
 import org.jfree.data.category.DefaultCategoryDataset;
 
 /**
+ * Class for generating bar charts for the semester project "Bird Flu"
  * 
  * @author Simon Aschenbrenner, Luis Rieke, Paul Gronemeyer, Büsra Bagci
  *
