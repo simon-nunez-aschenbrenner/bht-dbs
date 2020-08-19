@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.LinkedList;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
@@ -45,8 +44,8 @@ import org.jfree.chart.ChartUtils;
 public class ChartPlotter {
 	
 	public static final boolean INIT_TABLES = false;
-	public static final int CHART_WIDTH = 2500;
-	public static final int CHART_HEIGHT = 500;
+	public static final int CHART_WIDTH = 1200;
+	public static final int CHART_HEIGHT = 600;
 	public static final Level LOG_LEVEL = Level.FINE;
 	
 	public static void main(String[] args) {
@@ -67,19 +66,7 @@ public class ChartPlotter {
 		chrtLogger.addHandler(handler);
 		fileLogger.addHandler(handler);
 		
-		ChartPlotter plotter = new ChartPlotter(INIT_TABLES);
-		StringWriter report = new StringWriter();
-		int counter = 0;
-		for(BirdFluChart chart : plotter.createCharts()) {
-			if(plotter.saveChart(chart)) {
-				report.write(chart.getFilename() + ", ");
-				counter++;
-				}
-		}
-		if(counter > 0) {
-			Logger.getLogger("File Logger").info(String.format("Saved charts for: %s (%d/7)",
-					report.toString().substring(0, report.toString().length()-2), counter));
-		}
+		new ChartPlotter(INIT_TABLES).createCharts();
 	}
 	
 	public ChartPlotter(boolean createNewTables) {
@@ -87,17 +74,18 @@ public class ChartPlotter {
 	}
 	
 	/**
-	 * Scans the input directory for files to create charts using the read() method below.
-	 * The filename wil be carried through as an identifier of the source of each chart.
-	 * @return	a LinkedList containing all generated charts
+	 * Scans the input directory for files to create and save charts using the read-
+	 * and save-methods below. The filename will be carried through as an identifier
 	 */
-	public LinkedList<BirdFluChart> createCharts() {
+	
+	public void createCharts() {
+		StringWriter reportWriter = new StringWriter();
+		int counter = 0;
 		
-		LinkedList<BirdFluChart> chartList = new LinkedList<BirdFluChart>();
-		File dir = new File("./input/");
+		File[] input = new File("./input/").listFiles(new InputFileFilter());
 		Scanner in = null;
 		
-		for(File file : dir.listFiles(new InputFileFilter())) {
+		for(File file : input) {
 			String filename = file.getName();
 			if(filename.length() == 11) { filename = filename.substring(0, 7); };
 			if(filename.length() == 12) { filename = filename.substring(0, 8); };
@@ -107,8 +95,11 @@ public class ChartPlotter {
 				in = new Scanner(file);
 				BirdFluChart chart = read(in, filename);
 				if(chart != null) {
-					chartList.add(chart);
-					Logger.getLogger("File Logger").fine("Created chart for " + filename);
+					if(save(chart)) {
+						reportWriter.write(chart.getFilename() + ", ");
+						counter++;
+						Logger.getLogger("File Logger").fine("Created chart for " + filename);
+					}
 				}
 			} catch (FileNotFoundException e) {
 				Logger.getLogger("File Logger").warning
@@ -127,7 +118,14 @@ public class ChartPlotter {
 				}
 			}
 		}
-		return chartList;
+		
+		if(counter > 0) {
+			String report = reportWriter.toString();
+			Logger.getLogger("File Logger").info(String.format("%d/%d saved charts: %s",
+					counter, input.length, report.substring(0, report.length()-2)));
+		} else {
+			Logger.getLogger("File Logger").warning("No charts saved");
+		}
 	}
 	
 	/**
@@ -139,6 +137,7 @@ public class ChartPlotter {
 	 * @return 	a chart implementing the BirdFluChart interface, so it can be saved later
 	 * @throws NoSuchElementException
 	 */
+	
 	private BirdFluChart read(Scanner in, String filename)
 			throws NoSuchElementException, NumberFormatException {
 		
@@ -185,12 +184,9 @@ public class ChartPlotter {
 				String c1dQuery = in.nextLine();
 				String c2rQuery = in.nextLine();
 				String c2dQuery = in.nextLine();
-				String c3rQuery = in.nextLine();
-				String c3dQuery = in.nextLine();
 				Logger.getLogger("File Logger").finer(filename + " read succesfully");
 				return GroupedBarChart.createGroupedBarChart(filename, c1rQuery, c1dQuery,
-						c2rQuery, c2dQuery, c3rQuery, c3dQuery, title, catAxis3, valAxis3,
-						false, threshold);
+						c2rQuery, c2dQuery, title, catAxis3, valAxis3, false, threshold);
 			default:
 				return null;
 		}
@@ -202,7 +198,8 @@ public class ChartPlotter {
 	 * @param chart - the chart to be saved (must implement the BirdFluChart interface)
 	 * @return true if the chart was saved successfully, false if not
 	 */
-	public boolean saveChart(BirdFluChart chart) {
+	
+	public boolean save(BirdFluChart chart) {
 		if(chart != null) {
 			try {
 				ChartUtils.saveChartAsPNG(new File("./output/" + chart.getFilename()

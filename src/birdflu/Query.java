@@ -20,17 +20,19 @@ import java.util.logging.Logger;
 public class Query {
 	
 	protected String query;
+	protected Connection con;
 	protected ResultSet result;
 	protected Statement stmt;
 	
 	/**
 	 * Set up SQL Database Connection and initialize Statement-object
 	 */
+	
 	public Query() {
 		this.query = "Unknown Query";
 		try {
 			DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
-			Connection con = DriverManager.getConnection
+			con = DriverManager.getConnection
 					("jdbc:oracle:thin:@localhost:1521:rispdb1", "s908606", "dadatenbanken303!");
 			stmt = con.createStatement();
 			Logger.getLogger("SQL Logger").finer("Established connection to database");
@@ -42,6 +44,7 @@ public class Query {
 	/**
 	 * Set up SQL Database Connection and execute a single statement
 	 */
+	
 	public Query(String query) {
 		this();
 		this.query = query;
@@ -133,8 +136,9 @@ public class Query {
 	public void close() {
 		
 		try {
-			if(result != null) { result.close(); }
-			if(stmt != null) { stmt.close(); }
+			if (result != null) { result.close(); }
+			if (stmt != null) { stmt.close(); }
+			if (con != null) { con.close(); }
 		} catch (SQLException e) {
 			Logger.getLogger("SQL Logger").severe("SQL Exception: " + e.getMessage());
 		}

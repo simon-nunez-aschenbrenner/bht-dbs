@@ -13,6 +13,7 @@ import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.data.general.PieDataset;
 
 /**
+ * Class for generating pie charts for the semester project "Bird Flu"
  * 
  * @author Simon Aschenbrenner, Luis Rieke, Paul Gronemeyer, Büsra Bagci
  *
