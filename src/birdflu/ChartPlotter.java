@@ -43,10 +43,10 @@ import org.jfree.chart.ChartUtils;
 
 public class ChartPlotter {
 	
-	public static final boolean INIT_TABLES = false;
+	public static final boolean INIT_TABLES = true;
 	public static final int CHART_WIDTH = 1200;
 	public static final int CHART_HEIGHT = 600;
-	public static final Level LOG_LEVEL = Level.INFO;
+	public static final Level LOG_LEVEL = Level.FINE;
 	
 	public static void main(String[] args) {
 		Locale.setDefault(Locale.US);

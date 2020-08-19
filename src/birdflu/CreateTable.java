@@ -44,6 +44,7 @@ public final class CreateTable {
 	/**
 	 * Convenience method for dropping and subsequent creation
 	 */
+	
 	public static void init() {
 		clear();
 		create();
@@ -53,9 +54,12 @@ public final class CreateTable {
 	 * This method tries to drop all tables, sequences and views specified in the
 	 * corresponding .txt-file. If a table doesn't exist in the connected database
 	 * a SQL-Exception is thrown and the batch execution stops; perhaps leading
-	 * to missed commands, e.g. tables that are not dropped. Check database if an
-	 * exception is thrown, delete manually and use the create method to rebuild.
+	 * to missed commands, e.g. tables that are not dropped. Check database when an
+	 * exception is thrown, delete manually and call the init-method again. The
+	 * same exception will be thrown but the create-method will execute normally
+	 * afterwards (Alternatively call the create-method directly).
 	 */
+	
 	public static void clear() {
 		Query query = new Query();
 		read(DROP_TABLES, query);
@@ -66,6 +70,7 @@ public final class CreateTable {
 	 * Creates all tables, sequences and views in the order they are listed in the
 	 * array TABLES using the corresponding .txt-files containing the DDL-statements
 	 */
+	
 	public static void create() {
 		Query query = new Query();
 		for(String filename : TABLES) {
@@ -80,6 +85,7 @@ public final class CreateTable {
 	 * @param filename - .txt-file containing the DDL-statements
 	 * @param query - query-object that will handle the execution of the statements
 	 */
+	
 	private static void read(String filename, Query query) {
 		File file = new File("./tables/" + filename);
 		Scanner in = null;
@@ -128,6 +134,7 @@ public final class CreateTable {
 	 * @param query - query-object that will execute these statements
 	 * @return true if the whole batch was executed successfully, false if not
 	 */
+	
 	private static boolean batch(Scanner in, Query query) {
 		LinkedList<String> statements = new LinkedList<String>();
 		while(in.hasNextLine()) {

@@ -136,9 +136,9 @@ public class Query {
 	public void close() {
 		
 		try {
-			result.close();
-			stmt.close();
-			con.close();
+			if (result != null) { result.close(); }
+			if (stmt != null) { stmt.close(); }
+			if (con != null) { con.close(); }
 		} catch (SQLException e) {
 			Logger.getLogger("SQL Logger").severe("SQL Exception: " + e.getMessage());
 		}
