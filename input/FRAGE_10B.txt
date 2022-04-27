@@ -1,6 +1,6 @@
 GroupedBarChart
 2
-Suchen vs. Fälle (mehr als zwei Suchen)
+Suchen vs. Fälle
 Länder
 %
 SELECT SUM(SUCHEN) FROM SUCHEN_VS_FAELLE

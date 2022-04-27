@@ -42,11 +42,16 @@ import org.jfree.chart.ChartUtils;
  */
 
 public class ChartPlotter {
+
+	// Change these values as needed
+	public static int CHART_WIDTH = 1280;
+	public static int CHART_HEIGHT = 720;
+	public static Level LOG_LEVEL = Level.FINE;
 	
-	public static final boolean INIT_TABLES = false;
-	public static final int CHART_WIDTH = 1200;
-	public static final int CHART_HEIGHT = 600;
-	public static final Level LOG_LEVEL = Level.FINE;
+	// Do not change these constants
+	public static final int INIT = 1; // Drop tables and create them from scratch
+	public static final int CREATE = 2; // Don't drop, create tables from scratch
+	public static final int NO_INIT = 0; // Keep database, just create the charts
 	
 	public static void main(String[] args) {
 		Locale.setDefault(Locale.US);
@@ -66,11 +71,19 @@ public class ChartPlotter {
 		chrtLogger.addHandler(handler);
 		fileLogger.addHandler(handler);
 		
-		new ChartPlotter(INIT_TABLES).createCharts();
+		// Constructor's parameter must be either INIT, CREATE or NO_INIT (see above)
+		new ChartPlotter(NO_INIT).createCharts();
 	}
 	
-	public ChartPlotter(boolean createNewTables) {
-		if(createNewTables) { CreateTable.init(); }
+	public ChartPlotter(int init) {
+		switch(init) {
+			case 0: break;
+			case 1: CreateTable.init(); break;
+			case 2: CreateTable.create(); break;
+			default:
+				Logger.getLogger("File Logger").warning
+					("Wrong database initialization parameter");
+		}		
 	}
 	
 	/**

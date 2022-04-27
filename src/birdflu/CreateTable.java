@@ -42,7 +42,8 @@ public final class CreateTable {
 	};
 	
 	/**
-	 * Convenience method for dropping and subsequent creation
+	 * Convenience method for dropping and subsequent creation of all tables, sequences
+	 * and views specified in the corresponding .txt-files
 	 */
 	
 	public static void init() {
@@ -53,11 +54,11 @@ public final class CreateTable {
 	/**
 	 * This method tries to drop all tables, sequences and views specified in the
 	 * corresponding .txt-file. If a table doesn't exist in the connected database
-	 * a SQL-Exception is thrown and the batch execution stops; perhaps leading
-	 * to missed commands, e.g. tables that are not dropped. Check database when an
-	 * exception is thrown, delete manually and call the init-method again. The
-	 * same exception will be thrown but the create-method will execute normally
-	 * afterwards (Alternatively call the create-method directly).
+	 * a SQL-Exception is thrown and the batch execution stops; perhaps leading to
+	 * missed commands, e.g. tables that are not dropped. Check the database when an
+	 * exception is thrown, drop the missed tables manually and call the init-method
+	 * again. The same exception will be thrown but the create-method will execute
+	 * normally afterwards. (Alternatively call the create-method directly)
 	 */
 	
 	public static void clear() {
@@ -80,7 +81,7 @@ public final class CreateTable {
 	}
 	
 	/**
-	 * Exception handling prior to the batch-method below.
+	 * Exception handling prior to the batch-method
 	 * 
 	 * @param filename - .txt-file containing the DDL-statements
 	 * @param query - query-object that will handle the execution of the statements
