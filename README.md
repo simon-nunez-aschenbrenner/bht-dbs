@@ -22,7 +22,7 @@ main-Methode in `src/birdflu/ChartPlotter.java`
 *Berlin University of Applied Sciences and Technology*  
 *Lecturer: Aljoscha Marcel Everding*
 
-Learning of structure and operstion of database systems within a four-person team.  
+Learning of structure and operation of database systems within a four person team.  
 Examining reactions on the 2006 bird flu outbreak on the basis of the [leaked AOL search log](https://en.wikipedia.org/wiki/AOL_search_log_release "Wikipedia: AOL search log release") of the same year.  
 Data definition, queries, manipulation and transaction control using Structured Query Language (SQL) as well as chart plotting using [JFreeChart](https://jfree.org/jfreechart/ "JFreeChart") in Java.  
 Formulation of questions in natural language and translation to SQL-queries (see `input`), creation of own relations (see `tables`), generation of charts (see `output`).
